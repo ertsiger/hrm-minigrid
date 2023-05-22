@@ -1,6 +1,20 @@
-# Minimalistic Gridworld Environment (MiniGrid)
+# Hierarchies of Reward Machines - Minimalistic Gridworld Environment (MiniGrid)
 
-[![Build Status](https://travis-ci.org/maximecb/gym-minigrid.svg?branch=master)](https://travis-ci.org/maximecb/gym-minigrid)
+A modification of the MiniGrid environment to add new object classes. These objects are used to define the tasks in the
+CraftWorld environment introduced in the paper [Hierarchies of Reward Machines](). The implementation of the CraftWorld
+environment can be found [in this repository](https://github.com/ertsiger/hrm-formalism-envs).
+
+We have exclusively modified the `gym_minigrid/minigrid.py` file as follows:
+* Added colors `white`, `pink`, `cyan` and `brown`. See the `COLORS` ([link](gym_minigrid/minigrid.py#L14)) and 
+  `COLOR_TO_IDX` ([link](gym_minigrid/minigrid.py#L30)) global variables.
+* Added objects `iron`, `table`, `cow`, `sugarcane`, `wheat`, `chicken`, `redstone`, `rabbit`, `squid` and `workbench`.
+See the `OBJECT_TO_IDX` ([link](gym_minigrid/minigrid.py#L46)) global variable and new object classes 
+([link](gym_minigrid/minigrid.py#L358)).
+
+The rest of the `README` is a copy of the original one. If you directly use the CraftWorld environment [here](https://github.com/ertsiger/hrm-formalism-envs),
+you do not need to check it.
+
+--------
 
 There are other gridworld Gym environments out there, but this one is
 designed to be particularly simple, lightweight and fast. The code has very few
