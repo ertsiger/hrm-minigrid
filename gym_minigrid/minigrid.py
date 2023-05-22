@@ -12,24 +12,32 @@ TILE_PIXELS = 32
 
 # Map of color names to RGB values
 COLORS = {
-    'red'   : np.array([255, 0, 0]),
-    'green' : np.array([0, 255, 0]),
-    'blue'  : np.array([0, 0, 255]),
-    'purple': np.array([112, 39, 195]),
-    'yellow': np.array([255, 255, 0]),
-    'grey'  : np.array([100, 100, 100])
+    'red'      : np.array([255, 0, 0]),
+    'green'    : np.array([0, 255, 0]),
+    'blue'     : np.array([0, 0, 255]),
+    'purple'   : np.array([112, 39, 195]),
+    'yellow'   : np.array([255, 255, 0]),
+    'grey'     : np.array([100, 100, 100]),
+    'white'    : np.array([255, 255, 255]),  # new colors for our custom objects
+    'pink'     : np.array([255, 192, 203]),
+    'cyan'     : np.array([0, 255, 255]),
+    'brown'    : np.array([165, 42, 42])
 }
 
 COLOR_NAMES = sorted(list(COLORS.keys()))
 
 # Used to map colors to integers
 COLOR_TO_IDX = {
-    'red'   : 0,
-    'green' : 1,
-    'blue'  : 2,
-    'purple': 3,
-    'yellow': 4,
-    'grey'  : 5
+    'red'      : 0,
+    'green'    : 1,
+    'blue'     : 2,
+    'purple'   : 3,
+    'yellow'   : 4,
+    'grey'     : 5,
+    'white'    : 6,
+    'pink'     : 7,
+    'cyan'     : 8,
+    'brown'    : 9
 }
 
 IDX_TO_COLOR = dict(zip(COLOR_TO_IDX.values(), COLOR_TO_IDX.keys()))
@@ -47,6 +55,16 @@ OBJECT_TO_IDX = {
     'goal'          : 8,
     'lava'          : 9,
     'agent'         : 10,
+    'iron'          : 11,  # new objects start here
+    'table'         : 12,
+    'cow'           : 13,
+    'sugarcane'     : 14,
+    'wheat'         : 15,
+    'chicken'       : 16,
+    'redstone'      : 17,
+    'rabbit'        : 18,
+    'squid'         : 19,
+    'workbench'     : 20
 }
 
 IDX_TO_OBJECT = dict(zip(OBJECT_TO_IDX.values(), OBJECT_TO_IDX.keys()))
@@ -69,6 +87,7 @@ DIR_TO_VEC = [
     # Up (negative Y)
     np.array((0, -1)),
 ]
+
 
 class WorldObj:
     """
@@ -142,6 +161,8 @@ class WorldObj:
             v = Goal()
         elif obj_type == 'lava':
             v = Lava()
+        elif obj_type == 'workbench':
+            v = Workbench()
         else:
             assert False, "unknown object type in decode '%s'" % obj_type
 
@@ -150,6 +171,7 @@ class WorldObj:
     def render(self, r):
         """Draw this object with the given renderer"""
         raise NotImplementedError
+
 
 class Goal(WorldObj):
     def __init__(self):
@@ -160,6 +182,7 @@ class Goal(WorldObj):
 
     def render(self, img):
         fill_coords(img, point_in_rect(0, 1, 0, 1), COLORS[self.color])
+
 
 class Floor(WorldObj):
     """
@@ -200,6 +223,7 @@ class Lava(WorldObj):
             fill_coords(img, point_in_line(0.5, ylo, 0.7, yhi, r=0.03), (0,0,0))
             fill_coords(img, point_in_line(0.7, yhi, 0.9, ylo, r=0.03), (0,0,0))
 
+
 class Wall(WorldObj):
     def __init__(self, color='grey'):
         super().__init__('wall', color)
@@ -209,6 +233,7 @@ class Wall(WorldObj):
 
     def render(self, img):
         fill_coords(img, point_in_rect(0, 1, 0, 1), COLORS[self.color])
+
 
 class Door(WorldObj):
     def __init__(self, color, is_open=False, is_locked=False):
@@ -272,6 +297,7 @@ class Door(WorldObj):
             # Draw door handle
             fill_coords(img, point_in_circle(cx=0.75, cy=0.50, r=0.08), c)
 
+
 class Key(WorldObj):
     def __init__(self, color='blue'):
         super(Key, self).__init__('key', color)
@@ -293,6 +319,7 @@ class Key(WorldObj):
         fill_coords(img, point_in_circle(cx=0.56, cy=0.28, r=0.190), c)
         fill_coords(img, point_in_circle(cx=0.56, cy=0.28, r=0.064), (0,0,0))
 
+
 class Ball(WorldObj):
     def __init__(self, color='blue'):
         super(Ball, self).__init__('ball', color)
@@ -302,6 +329,7 @@ class Ball(WorldObj):
 
     def render(self, img):
         fill_coords(img, point_in_circle(0.5, 0.5, 0.31), COLORS[self.color])
+
 
 class Box(WorldObj):
     def __init__(self, color, contains=None):
@@ -325,6 +353,185 @@ class Box(WorldObj):
         # Replace the box by its contents
         env.grid.set(*pos, self.contains)
         return True
+
+
+class Iron(WorldObj):
+    def __init__(self, color='grey'):
+        super(Iron, self).__init__('iron', color)
+
+    def can_overlap(self):
+        return True
+
+    def render(self, img):
+        fill_coords(img, point_in_line(0.4, 0.3, 0.6, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.5, 0.3, 0.5, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.4, 0.7, 0.6, 0.7, 0.03), COLORS[self.color])
+
+
+class Table(WorldObj):
+    def __init__(self, color='brown'):
+        super(Table, self).__init__('table', color)
+
+    def can_overlap(self):
+        return True
+
+    def render(self, img):
+        fill_coords(img, point_in_line(0.4, 0.3, 0.6, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.5, 0.3, 0.5, 0.7, 0.03), COLORS[self.color])
+
+
+class Cow(WorldObj):
+    def __init__(self, color='white'):
+        super(Cow, self).__init__('cow', color)
+
+    def can_overlap(self):
+        return True
+
+    def render(self, img):
+        fill_coords(img, point_in_line(0.2, 0.3, 0.4, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.3, 0.2, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.7, 0.4, 0.7, 0.03), COLORS[self.color])
+
+        fill_coords(img, point_in_line(0.6, 0.3, 0.8, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.6, 0.3, 0.6, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.6, 0.7, 0.8, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.8, 0.3, 0.8, 0.7, 0.03), COLORS[self.color])
+
+
+class Sugarcane(WorldObj):
+    def __init__(self, color='green'):
+        super(Sugarcane, self).__init__('sugarcane', color)
+
+    def can_overlap(self):
+        return True
+
+    def render(self, img):
+        fill_coords(img, point_in_line(0.2, 0.3, 0.4, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.3, 0.2, 0.5, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.5, 0.4, 0.5, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.4, 0.5, 0.4, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.7, 0.4, 0.7, 0.03), COLORS[self.color])
+
+        fill_coords(img, point_in_line(0.6, 0.3, 0.6, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.6, 0.7, 0.8, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.8, 0.3, 0.8, 0.7, 0.03), COLORS[self.color])
+
+
+class Wheat(WorldObj):
+    def __init__(self, color='yellow'):
+        super(Wheat, self).__init__('wheat', color)
+
+    def can_overlap(self):
+        return True
+
+    def render(self, img):
+        fill_coords(img, point_in_line(0.2, 0.3, 0.2, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.7, 0.3, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.3, 0.3, 0.4, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.4, 0.3, 0.4, 0.7, 0.03), COLORS[self.color])
+
+        fill_coords(img, point_in_line(0.6, 0.3, 0.6, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.6, 0.5, 0.8, 0.5, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.8, 0.3, 0.8, 0.7, 0.03), COLORS[self.color])
+
+
+class Chicken(WorldObj):
+    def __init__(self, color='pink'):
+        super(Chicken, self).__init__('chicken', color)
+
+    def can_overlap(self):
+        return True
+
+    def render(self, img):
+        fill_coords(img, point_in_line(0.2, 0.3, 0.4, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.3, 0.2, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.7, 0.4, 0.7, 0.03), COLORS[self.color])
+
+        fill_coords(img, point_in_line(0.6, 0.3, 0.6, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.6, 0.5, 0.8, 0.5, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.8, 0.3, 0.8, 0.7, 0.03), COLORS[self.color])
+
+
+class Redstone(WorldObj):
+    def __init__(self, color='red'):
+        super(Redstone, self).__init__('redstone', color)
+
+    def can_overlap(self):
+        return True
+
+    def render(self, img):
+        fill_coords(img, point_in_line(0.2, 0.3, 0.2, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.3, 0.4, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.4, 0.3, 0.4, 0.5, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.5, 0.4, 0.5, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.5, 0.4, 0.7, 0.03), COLORS[self.color])
+
+        fill_coords(img, point_in_line(0.6, 0.3, 0.6, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.6, 0.3, 0.8, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.6, 0.5, 0.8, 0.5, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.6, 0.7, 0.8, 0.7, 0.03), COLORS[self.color])
+
+
+class Rabbit(WorldObj):
+    def __init__(self, color='cyan'):
+        super(Rabbit, self).__init__('rabbit', color)
+
+    def can_overlap(self):
+        return True
+
+    def render(self, img):
+        fill_coords(img, point_in_line(0.2, 0.3, 0.2, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.3, 0.4, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.4, 0.3, 0.4, 0.5, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.5, 0.4, 0.5, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.5, 0.4, 0.7, 0.03), COLORS[self.color])
+
+        fill_coords(img, point_in_line(0.6, 0.3, 0.6, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.6, 0.3, 0.8, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.6, 0.5, 0.8, 0.5, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.8, 0.3, 0.8, 0.7, 0.03), COLORS[self.color])
+
+
+class Squid(WorldObj):
+    def __init__(self, color='blue'):
+        super(Squid, self).__init__('squid', color)
+
+    def can_overlap(self):
+        return True
+
+    def render(self, img):
+        fill_coords(img, point_in_line(0.2, 0.3, 0.4, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.3, 0.2, 0.5, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.5, 0.4, 0.5, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.4, 0.5, 0.4, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.7, 0.4, 0.7, 0.03), COLORS[self.color])
+
+        fill_coords(img, point_in_line(0.6, 0.3, 0.8, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.6, 0.3, 0.6, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.6, 0.7, 0.8, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.8, 0.3, 0.8, 0.7, 0.03), COLORS[self.color])
+
+        fill_coords(img, point_in_line(0.7, 0.6, 0.9, 0.8, 0.03), COLORS[self.color])
+
+
+class Workbench(WorldObj):
+    def __init__(self, color='purple'):
+        super(Workbench, self).__init__('workbench', color)
+
+    def can_overlap(self):
+        return True
+
+    def render(self, img):
+        fill_coords(img, point_in_line(0.2, 0.3, 0.2, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.2, 0.7, 0.3, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.3, 0.3, 0.4, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.4, 0.3, 0.4, 0.7, 0.03), COLORS[self.color])
+
+        fill_coords(img, point_in_line(0.6, 0.3, 0.8, 0.3, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.6, 0.3, 0.6, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.6, 0.7, 0.8, 0.7, 0.03), COLORS[self.color])
+        fill_coords(img, point_in_line(0.8, 0.3, 0.8, 0.7, 0.03), COLORS[self.color])
+
 
 class Grid:
     """
@@ -615,6 +822,7 @@ class Grid:
 
         return mask
 
+
 class MiniGridEnv(gym.Env):
     """
     2D grid world game environment
@@ -769,6 +977,8 @@ class MiniGridEnv(gym.Env):
             'box'           : 'B',
             'goal'          : 'G',
             'lava'          : 'V',
+            'iron'          : 'i',
+            'table'         : 't'
         }
 
         # Short string for opened door
