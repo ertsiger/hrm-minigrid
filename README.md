@@ -1,7 +1,7 @@
 # Hierarchies of Reward Machines - Minimalistic Gridworld Environment (MiniGrid)
 
 A modification of the MiniGrid environment to add new object classes. These objects are used to define the tasks in the
-CraftWorld environment introduced in the paper [Hierarchies of Reward Machines](). The implementation of the CraftWorld
+CraftWorld environment introduced in the paper [Hierarchies of Reward Machines](https://arxiv.org/abs/2205.15752). The implementation of the CraftWorld
 environment can be found [in this repository](https://github.com/ertsiger/hrm-formalism-envs).
 
 We have exclusively modified the `gym_minigrid/minigrid.py` file as follows:
